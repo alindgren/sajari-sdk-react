@@ -8,7 +8,7 @@ const formatQueryTime = time => {
     return "";
   }
 
-  const splitNum = time.split(".");
+  const splitNum = String(time).split(".");
   if (splitNum.length === 1 || parseInt(splitNum[1]) === 0) {
     return parseInt(splitNum[0]) + "s";
   }
