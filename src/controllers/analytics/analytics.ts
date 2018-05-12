@@ -1,42 +1,57 @@
-import {
-  Listener,
-  trackingResetEvent,
-  responseUpdatedEvent,
-  resultClickedEvent
-} from "./";
+import { Listener, CallbackFn, ListenerMap } from "../listener";
 
-export const pageClosedAnalyticsEvent = "page-close-analytics";
-export const bodyResetAnalyticsEvent = "body-reset-analytics";
-export const resultClickedAnalyticsEvent = "result-clicked-analytics";
+import { Pipeline } from "../pipeline";
+import { Response } from "../response";
+import { Tracking } from "../tracking";
+
+import {
+  EVENT_RESPONSE_UPDATED,
+  EVENT_RESULT_CLICKED,
+  EVENT_ANALYTICS_PAGE_CLOSED,
+  EVENT_ANALYTICS_BODY_RESET,
+  EVENT_ANALYTICS_RESULT_CLICKED,
+  EVENT_TRACKING_RESET
+} from "../../events";
 
 const events = [
-  pageClosedAnalyticsEvent,
-  bodyResetAnalyticsEvent,
-  resultClickedAnalyticsEvent
+  EVENT_ANALYTICS_PAGE_CLOSED,
+  EVENT_ANALYTICS_BODY_RESET,
+  EVENT_ANALYTICS_RESULT_CLICKED
 ];
 
 /**
  * Analytics is an adaptor which listens for events on Pipeline and
  * Tracking and re-emits them as analytics-based events.
  */
-class Analytics {
+export class Analytics {
+  private enabled: boolean;
+  private body: string;
+  private pipeline: Pipeline;
+  private tracking: Tracking;
+  private listeners: ListenerMap;
+
+  private longestNonAutocompletedBody: string;
+  private longestAutocompletedBody: string;
+  private bodyLabel: string;
+  private bodyAutocompletedLabel: string;
+
   /**
    * Constructs an analytics object that operates on the specified pipeline.
-   * @param {Pipeline} pipeline
-   * @param {Sajari.Tracking} tracking
    */
-  constructor(pipeline, tracking) {
+  constructor(pipeline: Pipeline, tracking: Tracking) {
     this.enabled = false;
     this.body = "";
 
     this.pipeline = pipeline;
     this.tracking = tracking;
 
-    this.listeners = {
-      [pageClosedAnalyticsEvent]: new Listener(),
-      [bodyResetAnalyticsEvent]: new Listener(),
-      [resultClickedAnalyticsEvent]: new Listener()
-    };
+    this.listeners = new Map(
+      Object.entries({
+        [EVENT_ANALYTICS_PAGE_CLOSED]: new Listener(),
+        [EVENT_ANALYTICS_BODY_RESET]: new Listener(),
+        [EVENT_ANALYTICS_RESULT_CLICKED]: new Listener()
+      })
+    );
 
     // longest values are for sending the users last intended query on reset
     this.longestNonAutocompletedBody = "";
@@ -48,22 +63,22 @@ class Analytics {
 
     window.addEventListener("beforeunload", this.beforeunload);
 
-    this.pipeline.listen(responseUpdatedEvent, this.responseUpdated);
-    this.pipeline.listen(resultClickedEvent, this.resultClicked);
-    this.tracking.listen(trackingResetEvent, this.resetBody);
+    this.pipeline.listen(EVENT_RESPONSE_UPDATED, this.responseUpdated);
+    this.pipeline.listen(EVENT_RESULT_CLICKED, this.resultClicked);
+    this.tracking.listen(EVENT_TRACKING_RESET, this.resetBody);
   }
 
   /**
    * Register a listener for a specific event.
-   * @param {string} event Event to listen for
-   * @param {function()} callback Callback to run when the event happens.
-   * @return {function()} The unregister function to remove the callback from the listener.
+   * @param event Event to listen for
+   * @param callback Callback to run when the event happens.
+   * @return The unregister function to remove the callback from the listener.
    */
-  listen(event, callback) {
+  public listen(event: string, callback: CallbackFn) {
     if (events.indexOf(event) === -1) {
       throw new Error(`unknown event type "${event}"`);
     }
-    return this.listeners[event].listen(callback);
+    return (this.listeners.get(event) as Listener).listen(callback);
   }
 
   /**
@@ -71,9 +86,11 @@ class Analytics {
    */
   beforeunload = () => {
     if (this.enabled && this.body) {
-      this.listeners[pageClosedAnalyticsEvent].notify(callback => {
-        callback(this.body);
-      });
+      (this.listeners.get(EVENT_ANALYTICS_PAGE_CLOSED) as Listener).notify(
+        (callback) => {
+          callback(this.body);
+        }
+      );
       this.enabled = false; // TODO(tbillington): unload -> disable!!
     }
   };
@@ -83,9 +100,11 @@ class Analytics {
    */
   resetBody = () => {
     if (this.enabled) {
-      this.listeners[bodyResetAnalyticsEvent].notify(callback => {
-        callback(this.body);
-      });
+      (this.listeners.get(EVENT_ANALYTICS_BODY_RESET) as Listener).notify(
+        (callback) => {
+          callback(this.body);
+        }
+      );
 
       this.longestNonAutocompletedBody = "";
       this.longestAutocompletedBody = "";
@@ -96,16 +115,20 @@ class Analytics {
   /**
    * Runs when the response has been updated. Updates the currently held search parameters.
    */
-  responseUpdated = response => {
+  responseUpdated = (response: Response) => {
     if (response.isEmpty() || response.isError()) {
       return;
     }
 
     this.enabled = true;
 
-    const originalBody = response.getQueryValues()[this.bodyLabel] || "";
+    const originalBody =
+      (response.getQueryValues() as Map<string, string>).get(this.bodyLabel) ||
+      "";
     const responseBody =
-      response.getValues()[this.bodyAutocompletedLabel] || originalBody;
+      (response.getValues() as Map<string, string>).get(
+        this.bodyAutocompletedLabel
+      ) || originalBody;
 
     this.body = responseBody;
 
@@ -125,14 +148,14 @@ class Analytics {
    */
   resultClicked = () => {
     if (this.enabled && this.body) {
-      this.listeners[resultClickedAnalyticsEvent].notify(callback => {
-        callback(this.body);
-      });
+      (this.listeners.get(EVENT_ANALYTICS_RESULT_CLICKED) as Listener).notify(
+        (callback) => {
+          callback(this.body);
+        }
+      );
       this.longestNonAutocompletedBody = "";
       this.longestAutocompletedBody = "";
       this.enabled = false;
     }
   };
 }
-
-export { Analytics };

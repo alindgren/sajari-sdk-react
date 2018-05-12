@@ -1,4 +1,11 @@
-class Listener {
+export type CallbackFn = (...args: any[]) => void;
+export type UnlistenFn = () => void;
+
+export type ListenerMap = Map<string, Listener>;
+
+export class Listener {
+  private listeners: CallbackFn[];
+
   /**
    * Constructs a listener object.
    */
@@ -9,19 +16,18 @@ class Listener {
   /**
    * Adds a callback to the listener.
    * Returns a function that will unregister the callback from the listener when called.
-   * @param {function()} callback The callback to be registered.
-   * @return {function()} The unregister function to remove the callback from the listener.
+   * @param callback The callback to be registered.
+   * @return The unregister function to remove the callback from the listener.
    */
-  listen(callback) {
+  listen(callback: CallbackFn): UnlistenFn {
     this.listeners.push(callback);
     return () => this.unlisten(callback);
   }
 
   /**
    * Removes a callback from the listener.
-   * @param {function()} callback
    */
-  unlisten(callback) {
+  unlisten(callback: CallbackFn) {
     const index = this.listeners.indexOf(callback);
     if (index >= 0) {
       this.listeners.splice(index, 1);
@@ -31,12 +37,12 @@ class Listener {
   /**
    * Notify takes a function and calls it for every listener.
    * The listener is supplied as the first argument to the function.
-   * @param {function(callback: Function)} f Function to call each of the callbacks in the listener with.
+   * @param {function(callback: Function)} fn Function to call each of the callbacks in the listener with.
    */
-  notify(f) {
-    this.listeners.forEach(l => {
+  notify(fn: (callback: CallbackFn) => void) {
+    this.listeners.forEach((l) => {
       try {
-        f(l);
+        fn(l);
       } catch (e) {
         // eslint-disable-next-line no-console
         if (console && console.error) {
@@ -47,5 +53,3 @@ class Listener {
     });
   }
 }
-
-export default Listener;
