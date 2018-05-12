@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { Pipeline, Values, NoTracking } from "sajari-react";
+import { Pipeline, Values, NoTracking, Provider } from "sajari-react";
 
 const pipeline = new Pipeline(
   "sajariptyltd",
@@ -12,9 +12,9 @@ const pipeline = new Pipeline(
 const values = new Values();
 
 const App = () => (
-  <div>
+  <Provider pipeline={pipeline} values={values}>
     <h1>Hello World</h1>
-  </div>
+  </Provider>
 );
 
 ReactDOM.render(<App />, document.getElementById("root"));
