@@ -25,7 +25,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      "@sajari/react": path.resolve(__dirname, "../dist/index.es.js")
+      "sajari-react$": path.resolve(__dirname, "../dist/index.es.js")
     }
   },
   plugins: [

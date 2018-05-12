@@ -1,9 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { ui, controllers } from "@sajari/react";
-const { Input } = ui.text;
-const { Pipeline, Values, NoTracking } = controllers;
+import { Pipeline, Values, NoTracking } from "sajari-react";
 
 const pipeline = new Pipeline(
   "sajariptyltd",
@@ -16,7 +14,6 @@ const values = new Values();
 const App = () => (
   <div>
     <h1>Hello World</h1>
-    <Input pipeline={pipeline} values={values} />
   </div>
 );
 
