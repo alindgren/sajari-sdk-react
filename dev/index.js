@@ -1,7 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { Pipeline, Values, NoTracking, Provider, Input } from "sajari-react";
+import {
+  Pipeline,
+  Values,
+  NoTracking,
+  Provider,
+  Input,
+  Results
+} from "sajari-react";
 
 const pipeline = new Pipeline(
   "sajariptyltd",
@@ -14,6 +21,7 @@ const values = new Values();
 const App = () => (
   <Provider pipeline={pipeline} values={values}>
     <Input autocomplete="dropdown" />
+    <Results />
   </Provider>
 );
 
