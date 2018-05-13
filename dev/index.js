@@ -7,7 +7,8 @@ import {
   NoTracking,
   Provider,
   Input,
-  Results
+  Results,
+  Summary
 } from "sajari-react";
 
 const pipeline = new Pipeline(
@@ -21,6 +22,7 @@ const values = new Values();
 const App = () => (
   <Provider pipeline={pipeline} values={values}>
     <Input autocomplete="dropdown" />
+    <Summary />
     <Results />
   </Provider>
 );
