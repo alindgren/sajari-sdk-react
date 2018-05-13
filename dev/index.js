@@ -8,7 +8,8 @@ import {
   Provider,
   Input,
   Results,
-  Summary
+  Summary,
+  Paginator
 } from "sajari-react";
 
 const pipeline = new Pipeline(
@@ -24,6 +25,7 @@ const App = () => (
     <Input autocomplete="dropdown" />
     <Summary />
     <Results />
+    <Paginator />
   </Provider>
 );
 
