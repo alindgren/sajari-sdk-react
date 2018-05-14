@@ -9,7 +9,9 @@ import {
   Input,
   Results,
   Summary,
-  Paginator
+  Paginator,
+  Filter,
+  Tabs
 } from "sajari-react";
 
 const pipeline = new Pipeline(
@@ -20,9 +22,12 @@ const pipeline = new Pipeline(
 );
 const values = new Values();
 
+const filter = new Filter({ All: "" });
+
 const App = () => (
   <Provider pipeline={pipeline} values={values}>
     <Input autocomplete="dropdown" />
+    <Tabs filter={filter} tabs={[{ name: "all", display: "All" }]} />
     <Summary />
     <Results />
     <Paginator />
