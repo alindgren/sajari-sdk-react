@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import ReactDOM from "react-dom";
 
 import {
@@ -11,8 +11,7 @@ import {
   Summary,
   Paginator,
   Filter,
-  Tabs,
-  Select
+  Tabs
 } from "sajari-react";
 
 const pipeline = new Pipeline(
@@ -26,14 +25,19 @@ const values = new Values();
 const filter = new Filter({ All: "" });
 
 const App = () => (
-  <Provider pipeline={pipeline} values={values}>
+  <Fragment>
     <Input autocomplete="dropdown" />
     <Tabs filter={filter} tabs={[{ name: "all", display: "All" }]} />
-    <Select filter={filter} />
+
     <Summary />
     <Results />
     <Paginator />
-  </Provider>
+  </Fragment>
 );
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(
+  <Provider pipeline={pipeline} values={values}>
+    <App />
+  </Provider>,
+  document.getElementById("root")
+);
