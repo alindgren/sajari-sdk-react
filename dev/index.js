@@ -36,7 +36,7 @@ const App = () => (
 );
 
 ReactDOM.render(
-  <Provider pipeline={pipeline} values={values}>
+  <Provider search={{ pipeline, values }}>
     <App />
   </Provider>,
   document.getElementById("root")
