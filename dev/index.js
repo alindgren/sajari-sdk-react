@@ -7,6 +7,7 @@ import {
   NoTracking,
   Provider,
   Input,
+  Response,
   Results,
   Summary,
   Paginator,
@@ -26,12 +27,13 @@ const filter = new Filter({ All: "" });
 
 const App = () => (
   <Fragment>
-    <Input autocomplete="dropdown" />
-    <Tabs filter={filter} tabs={[{ name: "all", display: "All" }]} />
-
-    <Summary />
-    <Results />
-    <Paginator />
+    <Input autocomplete />
+    <Response>
+      <Tabs filter={filter} tabs={[{ name: "all", display: "All" }]} />
+      <Summary />
+      <Results />
+      <Paginator />
+    </Response>
   </Fragment>
 );
 
